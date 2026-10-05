@@ -21,6 +21,21 @@ Se abrió el PDF de cada decreto, se copió el título real y se volvió a clasi
 
 Tras el ajuste, el número de normas clasificadas como lluvias pasó de 17 a 18.
 
+Caso 2 - DataFrames demasiado complejos que no servían para los pasos siguientes
+
+1. ¿Qué le pedimos a la IA?
+Que armara un DataFrame con las normas extraídas de cada mes, con las columnas número de la norma, fecha de publicación, título y enlace.
+
+2. ¿Qué nos respondió?
+Un código que, además de crear el DataFrame, transformaba los datos, pues recortaba la denominación completa de la nomrma, dejando solo la numeración (e.g.018-2025-PCM); y convertía la fecha "Publicado: 30 de enero de 2025" a tipo fecha.
+
+3. ¿Qué estaba mal y cómo nos dimos cuenta?
+El código era más complejo de lo que pedía el ejercicio y nos dimos cuenta de que no servía cuando quisimos avanzar con los pasos siguientes, pues al recortar el número de la norma se perdía el texto original ("Decreto Supremo N.° 007-2025-PCM"), que después usamos para ubicar y corregir los DS 007 y 008.
+
+4. ¿Cómo lo corregimos?
+Simplificamos el código. En cada mes solo guardamos la lista de normas y la mostramos con `PD.DataFrame(...)`, sin transformar los datos. 
+El número y la fecha se dejaron como texto original ("Decreto Supremo N.° 007-2025-PCM", "Publicado: 10 de enero de 2025") y así se guardaron en `datos/decretos_lluvias.csv`. 
+
 ## Parte 2: API
 
 1. ¿Qué le pedimos a la IA?
