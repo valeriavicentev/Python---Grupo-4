@@ -12,7 +12,7 @@ import plotly.express as px
 import streamlit as st
 
 # ---------------------------------------------------------------- configuracion
-st.set_page_config(page_title="Dengue en el Perú", page_icon="🦟", layout="wide")
+st.set_page_config(page_title="Lluvia en el Perú", page_icon="🌧️", layout="wide")
 
 # La carpeta donde vive este archivo. Los datos se buscan aquí, y no "donde
 # sea que se haya lanzado la app": en tu computadora la corres desde esta
@@ -26,8 +26,8 @@ CARPETA = Path(__file__).parent
 # cada vez que alguien mueve un filtro y la app va lentísima.
 @st.cache_data
 def cargar():
-    datos = pd.read_csv(CARPETA / "datos.csv", dtype={"ubigeo": str})
-    formas = gpd.read_file(CARPETA / "distritos.geojson")
+    datos = pd.read_csv(CARPETA / "datos" / "tabla_final.csv", dtype={"ubigeo": str})
+    formas = gpd.read_file(CARPETA / "datos" / "distritos_peru.geojson")
     return datos, formas
 
 
@@ -38,31 +38,34 @@ st.sidebar.header("Filtros")
 
 departamentos = sorted(datos["departamento"].unique())
 elegidos = st.sidebar.multiselect(
-    "Departamento", departamentos, default=departamentos[:5]
+    "Departamento", departamentos, default=departamentos
 )
 
-minimo = st.sidebar.slider(
-    "Casos mínimos por distrito", 0, int(datos["casos_dengue"].max()), 0, step=50
+lluvia_min = float(datos["lluvia_total_mm"].min())
+lluvia_max = float(datos["lluvia_total_mm"].max())
+rango = st.sidebar.slider(
+    "Lluvia total (mm)", lluvia_min, lluvia_max, (lluvia_min, lluvia_max)
 )
 
 filtrado = datos[
-    datos["departamento"].isin(elegidos) & (datos["casos_dengue"] >= minimo)
+    datos["departamento"].isin(elegidos)
+    & datos["lluvia_total_mm"].between(rango[0], rango[1])
 ]
 
 # ------------------------------------------------------------------------ titulo
-st.title("🦟 Dengue y capacidad de respuesta en salud")
-st.caption("Casos 2015-2021 por distrito · Fuente: MINSA e INEI")
+st.title("🌧️ Lluvias y emergencias por departamento")
+st.caption("Lluvia acumulada y declaratorias de emergencia por departamento · Fuente: SENAMHI e INDECI")
 
 if filtrado.empty:
-    st.warning("No hay distritos que cumplan los filtros. Ajusta la selección.")
+    st.warning("No hay departamentos que cumplan los filtros. Ajusta la selección.")
     st.stop()
 
 # ---------------------------------------------------------------------- metricas
 c1, c2, c3, c4 = st.columns(4)
-c1.metric("Distritos", f"{len(filtrado):,}")
-c2.metric("Casos totales", f"{int(filtrado['casos_dengue'].sum()):,}")
-c3.metric("Establecimientos", f"{int(filtrado['n_establecimientos'].sum()):,}")
-c4.metric("Casos por establecimiento", f"{filtrado['casos_dengue'].sum() / max(filtrado['n_establecimientos'].sum(), 1):.1f}")
+c1.metric("Departamentos", f"{len(filtrado)}")
+c2.metric("Lluvia promedio", f"{filtrado['lluvia_total_mm'].mean():,.1f} mm")
+c3.metric("Días de lluvia fuerte", f"{int(filtrado['dias_lluvia_fuerte'].sum())}")
+c4.metric("Declaratorias de emergencia", f"{int(filtrado['declaratorias'].sum())}")
 
 st.divider()
 
