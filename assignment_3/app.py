@@ -62,7 +62,7 @@ filtrado = datos[
 
 # ------------------------------------------------------------------------ titulo
 st.title("🌧️ Lluvias y emergencias por departamento")
-st.caption("Lluvia acumulada y declaratorias de emergencia por departamento · Fuente: SENAMHI e INDECI")
+st.caption("Lluvia acumulada y declaratorias de emergencia por departamento · Fuente: Open-Meteo / Portal del Estado Peruano")
 
 if filtrado.empty:
     st.warning("No hay departamentos que cumplan los filtros. Ajusta la selección.")
